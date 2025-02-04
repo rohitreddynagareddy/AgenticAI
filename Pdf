@@ -1,0 +1,72 @@
+# Import necessary libraries
+import typer
+from typing import Optional, List
+from phi.assistant import Assistant
+from phi.storage.assistant.postgres import PgAssistantStorage
+from phi.knowledge.pdf import PDFUrlKnowledgeBase
+from phi.vectordb.pgvector import PgVector2
+
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Set up API key for Groq (assuming it's an AI service being used)
+os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+
+# Define the database URL for PostgreSQL
+db_url = "postgresql+psycopg://ai:ai@localhost:5532/ai"
+
+# Create a knowledge base from a PDF URL
+knowledge_base = PDFUrlKnowledgeBase(
+    urls=["https://phi-public.s3.amazonaws.com/recipes/ThaiRecipes.pdf"],
+    vector_db=PgVector2(collection="recipes", db_url=db_url),
+)
+
+# Load the knowledge base (this processes the PDF and stores embeddings)
+knowledge_base.load()
+
+# Set up storage for the assistant's data (conversation history, run IDs, etc.)
+storage = PgAssistantStorage(table_name="pdf_assistant", db_url=db_url)
+
+def pdf_assistant(new: bool = False, user: str = "user"):
+    """
+    Main function to run the PDF assistant.
+    
+    Args:
+    new (bool): Whether to start a new conversation or continue an existing one.
+    user (str): The user ID for the conversation.
+    """
+    run_id: Optional[str] = None
+
+    # If not starting a new conversation, try to retrieve an existing run ID
+    if not new:
+        existing_run_ids: List[str] = storage.get_all_run_ids(user)
+        if len(existing_run_ids) > 0:
+            run_id = existing_run_ids[0]
+
+    # Create an Assistant object
+    assistant = Assistant(
+        run_id=run_id,
+        user_id=user,
+        knowledge_base=knowledge_base,
+        storage=storage,
+        show_tool_calls=True,
+        search_knowledge=True,
+        read_chat_history=True,
+    )
+
+    # If it's a new run, get the new run ID from the assistant
+    if run_id is None:
+        run_id = assistant.run_id
+        print(f"Started Run : {run_id}")
+    else:
+        print(f"Continuing Run : {run_id}")
+
+    # Start the CLI application for the assistant
+    assistant.cli_app(markdown=True)
+
+# Use Typer to create a command-line interface for the pdf_assistant function
+if __name__ == "__main__":
+    typer.run(pdf_assistant)
