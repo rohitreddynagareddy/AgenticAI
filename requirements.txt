@@ -1,39 +1,16 @@
-# langchain
-# python-dotenv
-# langchain_openai
-# langchain_core
-# langchain_community
-# bs4
-# faiss-cpu
-# phidata
-# yfinance
-# packaging
-# duckduckgo_search
-# fastapi
-# unicorn
-# groq
-# openai
-# python-multipart
-# uvicorn
-# sqlalchemy
-# pgvector
-# psycopg
-# pypdf
-# arxiv
-# pymupdf
-# wikipedia
-# lxml
-# langchain_huggingface
 langchain
 python-dotenv
-langchain-openai
-langchain-core
-langchain-community
-bs4
-faiss-cpu
-pypdf
-arxiv
-pymupdf
+langchain_core
+langchain_community
+langchain_groq
+transformers
 wikipedia
-lxml
+arxiv
+langchain_community
+langchain_openai
+faiss_cpu
+fastapi
+langserve
+uvicorn
+sse_starlette
 langchain_huggingface
