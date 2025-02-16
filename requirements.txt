@@ -15,3 +15,4 @@ uvicorn
 sse_starlette
 langchain_huggingface
 langgraph
+langgraph-cli[inmem]
